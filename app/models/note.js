@@ -1,0 +1,15 @@
+const mongoose = require('mongoose')
+
+const noteSchema = new mongoose.Schema({
+  title: String,
+  body: String,
+  createdAt: {type: Date, default: Date.now()},
+  updateAt: {type: Date, default: Date.now()},
+  autor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
+    required: true
+  }
+})
+
+module.exports = mongoose.model('Note', noteSchema)
