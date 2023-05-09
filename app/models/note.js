@@ -5,7 +5,7 @@ const noteSchema = new mongoose.Schema({
   body: String,
   createdAt: {type: Date, default: Date.now()},
   updateAt: {type: Date, default: Date.now()},
-  autor: {
+  auth: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', 
     required: true

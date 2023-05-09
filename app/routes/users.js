@@ -20,4 +20,26 @@ router.post('/register', async(req, res) => {
   }
 })
 
+router.post('/login', async(req, res) => {
+  const {email, password} = req.body
+
+  try {
+    let user = await User.findOne({email});
+    if(!user){
+      res.status(401).json({error: 'incorrect email or password'});
+    }else {
+      user.isCorrectPassword(password, function (err, same) {
+        if(!same){
+          res.status(401).json({error: 'incorrect email or password'});
+        }else{
+          const token = jwt.sign({email}, secret, {expiresIn: '1d'});
+          res.status(200).json({user: user, token: token})
+        }
+      })
+    }
+  } catch (error) {
+    res.status(500).json({error: "Internal error, please try again"})
+  }
+})
+
 module.exports = router;
