@@ -23,6 +23,18 @@ router.post('/', withAuth, async (req, res) => {
   }
 })
 
+router.get('/search', withAuth, async (req, res) => {
+  const {query} = req.query
+  try {
+    let notes = await Note
+      .find({ auth: req.user._id})
+      .find({ $text: { $search: query}})
+    res.json(notes)
+  } catch (error) {
+    res.status(500).json({error: error.message})
+  }
+})
+
 router.get('/:id', withAuth, async(req, res) => {
   try {
     const {id} = req.params;
