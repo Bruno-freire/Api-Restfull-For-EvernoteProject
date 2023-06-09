@@ -58,7 +58,6 @@ router.put('/:id', withAuth, async (req, res) => {
         {$set: {title: title, body: body, updateAt: Date.now()}},
         {upsert: true, 'new': true}
       )
-      await newNote.save();
       res.status(200).json(newNote)
     }else{
       res.status(403).json({error: "Permission denied"});
