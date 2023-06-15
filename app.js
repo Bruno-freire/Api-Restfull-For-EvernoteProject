@@ -15,6 +15,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
+app.get('/', (req, res) => {
+  res.status(200).json("Ok")
+})
 app.use('/users', usersRouter);
 app.use('/notes', notesRouter);
 
