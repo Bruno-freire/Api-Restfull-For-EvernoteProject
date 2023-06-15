@@ -6,7 +6,8 @@
     "node": "18.x"
   },
   "scripts": {
-    "start": "node ./app.js"
+    "start": "node ./app.js",
+    "build": "npm i"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

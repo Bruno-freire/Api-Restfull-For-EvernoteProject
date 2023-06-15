@@ -15,15 +15,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-app.get('/', (req,res) => {
-  return res.json("Bem vindos")
-})
 app.use('/users', usersRouter);
 app.use('/notes', notesRouter);
 
 
-const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+module.exports = app;
