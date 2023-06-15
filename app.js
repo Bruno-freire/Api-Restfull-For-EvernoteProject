@@ -22,5 +22,8 @@ app.use('/users', usersRouter);
 app.use('/notes', notesRouter);
 
 
+const port = process.env.PORT || 3000;
 
-module.exports = app;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
