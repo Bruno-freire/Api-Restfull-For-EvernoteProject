@@ -8,17 +8,22 @@ const secret = process.env.JWT_TOKEN
 const User = require('../models/user');
 const withAuth = require('../middlewares/auth');
 
-router.post('/register', async(req, res) => {
-  const {name, email, password} = req.body;
-  const user = new User({name,email,password})
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = new User({ name, email, password });
 
   try {
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
     await user.save();
-    res.status(200).json(user)
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({error: `Error registering new user`})
+    res.status(500).json({ error: error.message });
   }
-})
+});
+
 
 router.post('/login', async(req, res) => {
   const {email, password} = req.body
