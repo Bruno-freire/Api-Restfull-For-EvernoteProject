@@ -1,0 +1,76 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Api developed to serve the javascriptNotes project in order to manipulate notes.",
+    "contact": {
+      "email": "brunofreire1717@gmail.com"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://apirestfullfornoteverseproject.onrender.com/",
+      "description": "production api"
+    }
+  ],
+  "paths": {
+    "/users/register": {
+      "post": {
+        "summary": "User registration",
+        "description": "This route will be responsible for registering a new user in the database.",
+        "tags": ["Users"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/User"
+              },
+              "examples": {
+                "Users": {
+                  "value": {
+                    "name": "Oliver James Parker",
+                    "email": "oliverjamesparker@gmail.com",
+                    "password": "oliver"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's name"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "unique": true
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User's creation date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User's last update date"
+          }
+        },
+        "required": ["name", "email", "password"]
+      }
+    }
+  }
+}

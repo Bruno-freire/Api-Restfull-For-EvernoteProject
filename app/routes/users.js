@@ -7,6 +7,7 @@ const secret = process.env.JWT_TOKEN
 
 const User = require('../models/user');
 const withAuth = require('../middlewares/auth');
+const { generateAuthenticationCode, sendConfirmationEmail } = require('../utils/authUtils');
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -23,7 +24,6 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 router.post('/login', async(req, res) => {
   const {email, password} = req.body
@@ -44,6 +44,20 @@ router.post('/login', async(req, res) => {
     }
   } catch (error) {
     res.status(500).json({error: "Internal error, please try again"})
+  }
+})
+
+router.post('/authentication', withAuth, async (req,res) => {
+  const authenticationCode = generateAuthenticationCode()
+
+  try {
+    const user = await User.findById(req.user._id)
+    user.authenticationCode = authenticationCode;
+    await user.save()
+    await sendConfirmationEmail(req.user.email, authenticationCode)
+    res.status(200).json({message: "authentication sent"})
+  } catch (error) {
+    res.status(400).json({error: error})
   }
 })
 
