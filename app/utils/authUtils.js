@@ -17,7 +17,7 @@ function generateAuthenticationCode() {
 async function sendConfirmationEmail (email, authenticationCode) {
   const mailOptions = {
     from: gmail,
-    to: 'mirellenamorim1234@gmail.com',
+    to: email,
     subject: 'Confirmação de E-mail',
     text: `Seu código de autenticação é: ${authenticationCode}`
   };
