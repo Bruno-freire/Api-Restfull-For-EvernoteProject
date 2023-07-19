@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   password: {type: String, required: true},
   createdAt: {type: Date, default: Date.now()},
   updatedAt: {type: Date, default: Date.now()},
+  authenticationCode: {type: Number, default: null},
+  authenticated: {type: Boolean, default: false},
+  authenticationCodeCreatedAt: {type: Date, default: null}
 })
 
 userSchema.pre('save', function (next) {
@@ -14,7 +17,6 @@ userSchema.pre('save', function (next) {
     bcrypt.hash(this.password, 10, 
       (err, hashedPassword) => {
         if(err) {
-          console.log(err)
           next(err);
         }else{
           this.password = hashedPassword;

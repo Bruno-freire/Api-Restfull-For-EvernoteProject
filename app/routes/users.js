@@ -8,13 +8,15 @@ const secret = process.env.JWT_TOKEN
 const User = require('../models/user');
 const withAuth = require('../middlewares/auth');
 const { generateAuthenticationCode, sendConfirmationEmail } = require('../utils/authUtils');
+const { validateAndTransformEmail } = require('../utils/validatedEmail');
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-  const user = new User({ name, email, password });
+  const validatedEmail = validateAndTransformEmail(email)
+  const user = new User({ name, validatedEmail, password });
 
   try {
-    const existingUser = await User.findOne({ email: email });
+    const existingUser = await User.findOne({email: validatedEmail });
     if (existingUser) {
       return res.status(400).json({ error: 'Email already registered' });
     }
@@ -27,12 +29,16 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async(req, res) => {
   const {email, password} = req.body
-
+  const validatedEmail = validateAndTransformEmail(email)
+ 
   try {
-    let user = await User.findOne({email});
+    const user = await User.findOne({email: validatedEmail});
     if(!user){
-      res.status(401).json({error: 'incorrect email or password'});
+      return res.status(401).json({error: 'incorrect email or password'});
     }else {
+      if(!user.authenticated){
+        return res.status(400).json({error: 'unauthenticated email'})
+      }
       user.isCorrectPassword(password, function (err, same) {
         if(!same){
           res.status(401).json({error: 'incorrect email or password'});
@@ -47,27 +53,59 @@ router.post('/login', async(req, res) => {
   }
 })
 
-router.post('/authentication', withAuth, async (req,res) => {
+router.post('/authentication/send-code', async (req,res) => {
+  const { email } = req.body
   const authenticationCode = generateAuthenticationCode()
-
+  const validatedEmail = validateAndTransformEmail(email)
+  
   try {
-    const user = await User.findById(req.user._id)
+    const user = await User.findOne({email: validatedEmail});
+
+    if (user.authenticated) {
+      return res.status(403).json({ message: 'User already authenticated' });
+    }
+    
     user.authenticationCode = authenticationCode;
+    user.authenticationCodeCreatedAt = Date.now();
     await user.save()
-    await sendConfirmationEmail(req.user.email, authenticationCode)
+    await sendConfirmationEmail(user.email, authenticationCode)
     res.status(200).json({message: "authentication sent"})
   } catch (error) {
-    res.status(400).json({error: error})
+    res.status(500).json({ error: 'There was an error sending the authentication code' });
   }
 })
 
+router.post('/authentication/verify-code', async (req, res) => {
+  const { authenticationCode, email } = req.body;
+  const validatedEmail = validateAndTransformEmail(email)
+
+  try {
+    const user = await User.findOne({email: validatedEmail})
+
+    if (user.authenticated) {
+      return res.status(403).json({ message: 'User already authenticated' });
+    }
+
+    if (authenticationCode === user.authenticationCode) {
+      user.authenticated = true;
+      await user.save();
+      return res.status(200).json({ message: 'Authentication code is correct' });
+    } else {
+      return res.status(400).json({ error: 'Invalid authentication code' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'An error occurred while verifying the authentication code' });
+  }
+});
+
 router.put('/', withAuth, async (req, res) => {
   const {name, email} = req.body
+  const validatedEmail = validateAndTransformEmail(email)
 
   try {
     const user = await User.findOneAndUpdate(
       {_id: req.user._id},
-      {$set: {name: name, email: email}},
+      {$set: {name: name, email: validatedEmail}},
       {$upsert: true, 'new': true}
     )
     res.status(200).json(user)

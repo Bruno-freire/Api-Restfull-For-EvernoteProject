@@ -21,9 +21,7 @@ app.use(cors());
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use('/users', usersRouter);
 app.use('/notes', notesRouter);
-app.use('/', (req, res) => {
-  res.status(200).json({message: "Server online"})
-})
+app.use('/', (req, res) => res.status(200).json({message: "Server online"}))
 
 
 module.exports = app;
