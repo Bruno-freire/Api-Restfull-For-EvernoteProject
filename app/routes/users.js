@@ -13,7 +13,7 @@ const { validateAndTransformEmail } = require('../utils/validatedEmail');
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   const validatedEmail = validateAndTransformEmail(email)
-  const user = new User({ name, validatedEmail, password });
+  const user = new User({ name, email: validatedEmail, password });
 
   try {
     const existingUser = await User.findOne({email: validatedEmail });
