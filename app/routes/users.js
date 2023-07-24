@@ -8,11 +8,11 @@ const secret = process.env.JWT_TOKEN
 const User = require('../models/user');
 const withAuth = require('../middlewares/auth');
 const { generateAuthenticationCode, sendConfirmationEmail } = require('../utils/authUtils');
-const { validateAndTransformEmail } = require('../utils/validatedEmail');
+const { validateAndTransformEmail } = require('../middlewares/validatedEmail');
 
-router.post('/register', async (req, res) => {
+router.post('/register', validateAndTransformEmail, async (req, res) => {
   const { name, email, password } = req.body;
-  const validatedEmail = validateAndTransformEmail(email)
+  const validatedEmail = email
   const user = new User({ name, email: validatedEmail, password });
 
   try {
@@ -27,9 +27,9 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async(req, res) => {
+router.post('/login', validateAndTransformEmail, async(req, res) => {
   const {email, password} = req.body
-  const validatedEmail = validateAndTransformEmail(email)
+  const validatedEmail = email
  
   try {
     const user = await User.findOne({email: validatedEmail});
@@ -53,10 +53,10 @@ router.post('/login', async(req, res) => {
   }
 })
 
-router.post('/authentication/send-code', async (req,res) => {
+router.post('/authentication/send-code', validateAndTransformEmail, async (req,res) => {
   const { email } = req.body
   const authenticationCode = generateAuthenticationCode()
-  const validatedEmail = validateAndTransformEmail(email)
+  const validatedEmail = email
   
   try {
     const user = await User.findOne({email: validatedEmail});
@@ -75,9 +75,9 @@ router.post('/authentication/send-code', async (req,res) => {
   }
 })
 
-router.post('/authentication/verify-code', async (req, res) => {
+router.post('/authentication/verify-code', validateAndTransformEmail, async (req, res) => {
   const { authenticationCode, email } = req.body;
-  const validatedEmail = validateAndTransformEmail(email)
+  const validatedEmail = email
 
   try {
     const user = await User.findOne({email: validatedEmail})
@@ -98,9 +98,9 @@ router.post('/authentication/verify-code', async (req, res) => {
   }
 });
 
-router.put('/', withAuth, async (req, res) => {
+router.put('/', withAuth, validateAndTransformEmail, async (req, res) => {
   const {name, email} = req.body
-  const validatedEmail = validateAndTransformEmail(email)
+  const validatedEmail = email
 
   try {
     const user = await User.findOneAndUpdate(
