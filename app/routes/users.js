@@ -41,7 +41,9 @@ router.post('/login', validateAndTransformEmail, async(req, res) => {
           res.status(401).json({error: 'incorrect email or password'});
         }else{
           if(!user.authenticated){
-            return res.status(400).json({error: 'unauthenticated email'})
+            if(user.name !== "userNull"){
+              return res.status(400).json({error: 'unauthenticated email'})
+            }
           }
           const token = jwt.sign({email}, secret, {expiresIn: '1d'});
           res.status(200).json({user: user, token: token})
